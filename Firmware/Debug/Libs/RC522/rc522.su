@@ -1,0 +1,12 @@
+../Libs/RC522/rc522.c:12:6:MFRC522_Init	16	static
+../Libs/RC522/rc522.c:48:18:MFRC522_Request	40	static
+../Libs/RC522/rc522.c:65:18:MFRC522_Check	24	static
+../Libs/RC522/rc522.c:80:18:MFRC522_Anticoll	32	static
+../Libs/RC522/rc522.c:108:18:MFRC522_ToCard	48	static
+../Libs/RC522/rc522.c:218:6:MFRC522_Write	24	static
+../Libs/RC522/rc522.c:227:9:MFRC522_Read	24	static
+../Libs/RC522/rc522.c:239:6:MFRC522_Reset	16	static
+../Libs/RC522/rc522.c:244:6:MFRC522_Antenna_On	16	static
+../Libs/RC522/rc522.c:249:6:MFRC522_Antenna_Off	16	static
+../Libs/RC522/rc522.c:254:6:MFRC522_SetBIT	24	static
+../Libs/RC522/rc522.c:261:6:MFRC522_ClearBIT	24	static
