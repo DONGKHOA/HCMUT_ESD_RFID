@@ -41,10 +41,7 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-<<<<<<< HEAD
 SPI_HandleTypeDef hspi2;
-=======
->>>>>>> ba192228dce1498b9997e06d06175621f0ff4047
 
 /* USER CODE BEGIN PV */
 uint8_t status;
@@ -55,10 +52,8 @@ uint8_t serNum[5];
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
-<<<<<<< HEAD
 static void MX_SPI2_Init(void);
-=======
->>>>>>> ba192228dce1498b9997e06d06175621f0ff4047
+
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -96,10 +91,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-<<<<<<< HEAD
   MX_SPI2_Init();
-=======
->>>>>>> ba192228dce1498b9997e06d06175621f0ff4047
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -167,7 +159,6 @@ void SystemClock_Config(void)
 }
 
 /**
-<<<<<<< HEAD
   * @brief SPI2 Initialization Function
   * @param None
   * @retval None
@@ -206,8 +197,6 @@ static void MX_SPI2_Init(void)
 }
 
 /**
-=======
->>>>>>> ba192228dce1498b9997e06d06175621f0ff4047
   * @brief GPIO Initialization Function
   * @param None
   * @retval None
