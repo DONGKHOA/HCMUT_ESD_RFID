@@ -1,0 +1,9 @@
+../Core/Src/main.c:73:6:administrator	16	static
+../Core/Src/main.c:81:6:admin_mode	16	static
+../Core/Src/main.c:95:6:user_mode	4	static
+../Core/Src/main.c:100:6:card_mode	4	static
+../Core/Src/main.c:110:5:main	24	static
+../Core/Src/main.c:205:6:SystemClock_Config	72	static
+../Core/Src/main.c:242:13:MX_SPI2_Init	8	static
+../Core/Src/main.c:280:13:MX_GPIO_Init	32	static
+../Core/Src/main.c:312:6:Error_Handler	4	static,ignoring_inline_asm

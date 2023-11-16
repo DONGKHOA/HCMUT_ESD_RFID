@@ -5,6 +5,11 @@
 
 #include "stm32f1xx_hal.h"
 
+typedef enum
+{
+	PRESSING_STATE,
+	NONE_PRESSING_STATE
+}keyPad_State_t;
 
 void keypad_init(void);
 char keypad_handle ();

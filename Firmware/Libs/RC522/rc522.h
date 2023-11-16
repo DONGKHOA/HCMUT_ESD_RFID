@@ -2,7 +2,6 @@
 #define MFRC522_H_
 
 #include "main.h"
-#include "stm32f1xx_hal.h"
 
 #define u_char   unsigned char
 #define uint    unsigned int

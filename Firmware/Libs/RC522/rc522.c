@@ -4,6 +4,7 @@
 #include <string.h>
 #include <inttypes.h>
 #include "rc522.h"
+
 extern SPI_HandleTypeDef hspi2;
 //------------------------------------------------------
 /*

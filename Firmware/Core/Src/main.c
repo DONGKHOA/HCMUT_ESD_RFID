@@ -23,6 +23,8 @@
 /* USER CODE BEGIN Includes */
 #include "rc522.h"
 #include "memory.h"
+#include "string.h"
+#include "key_pad_basic.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -32,7 +34,14 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define KEYPAD_STATE            0
+#define CHANGE_PASSWORD_ADMIN   1
+#define UNBLOCK_USER            2
+#define CHANGE_PASSWORD_USER    3
+#define ADD_NEW_CARD            4
+#define MODE_USER               5
+#define BLOCK_SYSTEM            6
+#define BLOCK_USER              7
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -47,13 +56,19 @@ SPI_HandleTypeDef hspi2;
 uint8_t status;
 u_char str[MAX_LEN]; // Max_LEN = 16
 uint8_t serNum[5];
+uint8_t flag = 0;
+uint8_t block_system = 0;
+
+//Using key pad
+char password[16];
+char admin_password_store[15] = "*#000#12345678";
+char user_password_store[10] = "123456789";
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_SPI2_Init(void);
-
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -61,6 +76,46 @@ static void MX_SPI2_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+void administrator(void)
+{
+	// show selection
+	char temp = 0;
+  if ((flag))
+  {
+    
+  }
+  
+  while (1)
+  {
+	  temp = keypad_handle();
+    
+  }
+  
+}
+
+void admin_mode(uint8_t choice)
+{
+	  switch(choice)
+	  {
+	  case '1':
+		  administrator();
+		  break;
+	  case '2':
+		  break;
+	  case '3':
+		  break;
+	  }
+}
+
+void user_mode(void)
+{
+
+}
+
+void card_mode(void)
+{
+
+}
 /* USER CODE END 0 */
 
 /**
@@ -118,6 +173,46 @@ int main(void)
 //		  {
 //			  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13,	1);
 //		  }
+	  uint8_t _index = 0;
+	  if(block_system < 5)
+	  {
+      if ((flag & (1 << KEYPAD_STATE)) != (1 << KEYPAD_STATE))
+      {        
+        while(keypad_handle() != NONE_PRESSING_STATE)
+        {
+          password[_index] = keypad_handle();
+          _index++;
+          if(_index == 14)
+          {
+            flag |= (1 << KEYPAD_STATE);
+            _index = 0;
+          }
+        }
+      }
+      
+		  if((flag & (1 << KEYPAD_STATE)) == (1 << KEYPAD_STATE))
+		  {
+			  uint8_t temp = password[14];
+			  password[14] = '\0';
+			  if(strcmp(password, admin_password_store) == 0)
+			  {
+				  admin_mode(temp);
+
+			  }
+			  else if (strcmp(password, user_password_store) == 0)
+			  {
+
+			  }
+			  else
+			  {
+				  block_system++;
+			  }
+		  }
+	  }
+	  else
+	  {
+		  // store state block system in eeprom
+	  }
   }
   /* USER CODE END 3 */
 }
@@ -210,39 +305,6 @@ static void MX_GPIO_Init(void)
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
-  __HAL_RCC_GPIOB_CLK_ENABLE();
-
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3
-                          |GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7
-                          |GPIO_PIN_8|GPIO_PIN_9, GPIO_PIN_RESET);
-
-  /*Configure GPIO pins : PA0 PA1 PA2 PA3 */
-  GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : PA4 PA5 PA6 */
-  GPIO_InitStruct.Pin = GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : PB0 PB1 PB2 PB3
-                           PB4 PB5 PB6 PB7
-                           PB8 PB9 */
-  GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3
-                          |GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7
-                          |GPIO_PIN_8|GPIO_PIN_9;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(RS_GPIO_Port, RS_Pin, GPIO_PIN_RESET);

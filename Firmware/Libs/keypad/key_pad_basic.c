@@ -73,15 +73,15 @@ uint8_t keypad_scan()
   if(HAL_GPIO_ReadPin(ROW_4_Port, ROW_4_Pin) == GPIO_PIN_RESET)
       return i + 9;
   }
-  return 13;
+  return NONE_PRESSING_STATE;
 }
 
 char keypad_handle ()
 {
 	char keys[12] = {'1','2','3','4','5','6','7','8','9','*','0','#'};
-	uint8_t key_current;
-	uint8_t key_last = 13;
-	uint8_t key_debouncing = 13;
+	keyPad_State_t key_current;
+	keyPad_State_t key_last = NONE_PRESSING_STATE;
+	uint8_t key_debouncing = NONE_PRESSING_STATE;
 	uint8_t is_debouncing = 0;
 	uint32_t debounce_timer;
 
@@ -94,7 +94,7 @@ char keypad_handle ()
 		key_debouncing = key;
 	}
 
-	// debouncing successfull
+	// debouncing sucessfull
 	if(is_debouncing == 1 && (HAL_GetTick() - debounce_timer >= 15))
 	{
 		key_current = key_debouncing;
@@ -103,7 +103,7 @@ char keypad_handle ()
 
 	if(key_current != key_last)
 	{
-		if(key_current != 13)
+		if(key_current != NONE_PRESSING_STATE)
 		{
 //			keypad_pressing_callback(key_current);
 			return keys[key];
