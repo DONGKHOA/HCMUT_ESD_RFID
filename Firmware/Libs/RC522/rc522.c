@@ -1,278 +1,531 @@
-/*
- * rc522.c
- *
- *  Created on: Oct 1, 2023
- *      Author: khoa dong
- */
 
-
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <inttypes.h>
 #include "rc522.h"
-#include "main.h"
+extern SPI_HandleTypeDef hspi2;
+//------------------------------------------------------
+/*
+ * Function Nameï¼šWrite_MFRC5200
+ * Function Description: To a certain MFRC522 register to write a byte of data
+ * Input Parametersï¼šaddr - register address; val - the value to be written
+ * Return value: None
+ */
+void Write_MFRC522(u_char addr, u_char val) {
+	u_char addr_bits = (((addr << 1) & 0x7E));
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(&hspi2, &addr_bits, 1, 500);
+  HAL_SPI_Transmit(&hspi2, &val, 1, 500);
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
+}
+//-----------------------------------------------
+/*
+ * Function Name: Read_MFRC522
+ * Description: From a certain MFRC522 read a byte of data register
+ * Input Parameters: addr - register address
+ * Returns: a byte of data read from the
+ */
+u_char Read_MFRC522(u_char addr) {
+  u_char rx_bits;
+  u_char addr_bits = (((addr<<1) & 0x7E) | 0x80);
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(&hspi2, &addr_bits, 1, 500);
+  HAL_SPI_TransmitReceive(&hspi2, 0x00, &rx_bits, 1, 500);
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
 
-void MFRC522_Init(MFRC522_t *RC522_x)
+	return (u_char) rx_bits;
+}
+//--------------------------------------------------------
+/*
+ * Function Nameï¼šSetBitMask
+ * Description: Set RC522 register bit
+ * Input parameters: reg - register address; mask - set value
+ * Return value: None
+ */
+void SetBitMask(u_char reg, u_char mask)
 {
-//    HAL_GPIO_WritePin(RC522_x->reset.port, RC522_x->reset.pin, GPIO_PIN_SET);
-//    HAL_Delay(100);
-
-    MFRC522_Reset(RC522_x);
-
-#if 0
-  // Timer: TPrescaler*TreloadVal/6.78MHz = 24msx
-   MFRC522_Write(RC522_x, TModeReg, 0x80); // 0x8D);      // Tauto=1; f(Timer) = 6.78MHz/TPreScaler
-   MFRC522_Write(RC522_x, TPrescalerReg, 0xA9); //0x34); // TModeReg[3..0] + TPrescalerReg
-   MFRC522_Write(RC522_x, TReloadRegL, 0x03); //30);
-   MFRC522_Write(RC522_x, TReloadRegH, 0xE8); //0);
-   MFRC522_Write(RC522_x, TxAutoReg, 0x40);     // force 100% ASK modulation
-   MFRC522_Write(RC522_x, ModeReg, 0x3D);       // CRC Initial value 0x6363
-
-  // interrupts, still playing with these
-  //  MFRC522_Write(RC522_x,CommIEnReg, 0xFF);
-  //  MFRC522_Write(RC522_x,DivlEnReg, 0xFF);
-
-#else
-    MFRC522_Write(RC522_x, TModeReg, 0x8D);
-	MFRC522_Write(RC522_x, TPrescalerReg, 0x3E);
-	MFRC522_Write(RC522_x, TReloadRegL, 30);           
-	MFRC522_Write(RC522_x, TReloadRegH, 0);
-
-	/* 48dB gain */
-	MFRC522_Write(RC522_x, RFCfgReg, 0x70);
-	
-	MFRC522_Write(RC522_x, TxAutoReg, 0x40);
-	MFRC522_Write(RC522_x, ModeReg, 0x3D);
-#endif
-  // turn antenna on
-  MFRC522_Antenna_On(RC522_x);
+    u_char tmp;
+    tmp = Read_MFRC522(reg);
+    Write_MFRC522(reg, (tmp | mask));  // set bit mask
+}
+//
+/*
+ * Function Name: ClearBitMask
+ * Description: clear RC522 register bit
+ * Input parameters: reg - register address; mask - clear bit value
+ * Return value: None
+*/
+void ClearBitMask(u_char reg, u_char mask)
+{
+    u_char tmp;
+    tmp = Read_MFRC522(reg);
+    Write_MFRC522(reg, (tmp & (~mask)));  // clear bit mask
 }
 
-MFRC522_Status_t MFRC522_Request(MFRC522_t *RC522_x, uint8_t reqMode, uint8_t *tagType)
+//-----------------------------------------------
+/*
+ * Function Nameï¼šAntennaOn
+ * Description: Open antennas, each time you start or shut down the natural barrier between the transmitter should be at least 1ms interval
+ * Input: None
+ * Return value: None
+ */
+void AntennaOn(void)
 {
-    MFRC522_Status_t status;
-    uint16_t backBits;   // The received data bits
-    MFRC522_Write(RC522_x, BitFramingReg, 0x07);   // TxLastBists = BitFramingReg[2..0]
+  SetBitMask(TxControlReg, 0x03);
+}
 
-    tagType[0] = reqMode;
 
-    status = MFRC522_ToCard(RC522_x, PCD_TRANSCEIVE, tagType, 1, tagType, &backBits);
-    if ((status != MFRC_522_OK) || (backBits != 0x10)) 
-    {
-        status = MFRC_522_ERR;
-    }
+/*
+  * Function Name: AntennaOff
+  * Description: Close antennas, each time you start or shut down the natural barrier between the transmitter should be at least 1ms interval
+  * Input: None
+  * Return value: None
+ */
+void AntennaOff(void)
+{
+  ClearBitMask(TxControlReg, 0x03);
+}
+
+
+/*
+ * Function Name: ResetMFRC522
+ * Description: Reset RC522
+ * Input: None
+ * Return value: None
+ */
+void MFRC522_Reset(void)
+{
+  Write_MFRC522(CommandReg, PCD_RESETPHASE);
+}
+//--------------------------------------------------
+/*
+ * Function Nameï¼šInitMFRC522
+ * Description: Initialize RC522
+ * Input: None
+ * Return value: None
+*/
+void MFRC522_Init(void)
+{
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, 1);
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, 1);
+  MFRC522_Reset();
+
+  // Timer: TPrescaler*TreloadVal/6.78MHz = 24ms
+	Write_MFRC522(TModeReg, 0x8D);
+	Write_MFRC522(TPrescalerReg, 0x3E);
+	Write_MFRC522(TReloadRegL, 30);
+	Write_MFRC522(TReloadRegH, 0);
+
+	/* 48dB gain */
+	Write_MFRC522(RFCfgReg, 0x70);
+
+	Write_MFRC522(TxAutoReg, 0x40);
+	Write_MFRC522(ModeReg, 0x3D);
+
+  // interrupts, still playing with these
+  // Write_MFRC522(CommIEnReg, 0xFF);
+  // Write_MFRC522(DivlEnReg, 0xFF);
+  AntennaOff();
+  HAL_Delay(1);
+  // turn antenna on
+  AntennaOn();
+}
+//------------------------------------------------------------------
+/*
+ * Function Nameï¼šMFRC522_Request
+ * Description: Find cards, read the card type number
+ * Input parameters: reqMode - find cards way
+ *   TagType - Return Card Type
+ *    0x4400 = Mifare_UltraLight
+ *    0x0400 = Mifare_One(S50)
+ *    0x0200 = Mifare_One(S70)
+ *    0x0800 = Mifare_Pro(X)
+ *    0x4403 = Mifare_DESFire
+ * Return value: the successful return MI_OK
+ */
+u_char MFRC522_Request(u_char reqMode, u_char *TagType)
+{
+  u_char status;
+  uint backBits; // The received data bits
+
+  Write_MFRC522(BitFramingReg, 0x07);   // TxLastBists = BitFramingReg[2..0]
+
+  TagType[0] = reqMode;
+
+  status = MFRC522_ToCard(PCD_TRANSCEIVE, TagType, 1, TagType, &backBits);
+  if ((status != MI_OK) || (backBits != 0x10)) {
+    status = MI_ERR;
+  }
 
   return status;
 }
 
-MFRC522_Status_t MFRC522_Check(MFRC522_t *RC522_x, uint8_t* id)
+//-----------------------------------------------
+/*
+ * Function Name: MFRC522_ToCard
+ * Description: RC522 and ISO14443 card communication
+ * Input Parameters: command - MF522 command word,
+ *			 sendData--RC522 sent to the card by the data
+ *			 sendLen--Length of data sent
+ *			 backData--Received the card returns data,
+ *			 backLen--Return data bit length
+ * Return value: the successful return MI_OK
+ */
+u_char MFRC522_ToCard(u_char command, u_char *sendData, u_char sendLen, u_char *backData, uint *backLen)
 {
-	MFRC522_Status_t status;
-	//Find cards, return card type
-	status = MFRC522_Request(RC522_x, PICC_REQIDL, id);	
-	if (status == MFRC_522_OK) {
-		//Card detected
-		//Anti-collision, return card serial number 4 bytes
-		status = MFRC522_Anticoll(RC522_x, id);
-	}
-//	MFRC522_Halt();			//Command card into hibernation
+  u_char status = MI_ERR;
+  u_char irqEn = 0x00;
+  u_char waitIRq = 0x00;
+  u_char lastBits;
+  u_char n;
+  uint i;
 
-	return status;
-}
-
-MFRC522_Status_t MFRC522_Anticoll(MFRC522_t *RC522_x, uint8_t* serNum)
-{
-	MFRC522_Status_t status;
-	uint8_t i;
-	uint8_t serNumCheck = 0;
-	uint16_t unLen;
-
-	MFRC522_Write(RC522_x, BitFramingReg, 0x00);		//TxLastBists = BitFramingReg[2..0]
-
-	serNum[0] = PICC_ANTICOLL;
-	serNum[1] = 0x20;
-	status = MFRC522_ToCard(RC522_x, PCD_TRANSCEIVE, serNum, 2, serNum, &unLen);
-
-	if (status == MFRC_522_OK) 
-    {
-		//Check card serial number
-		for (i = 0; i < 4; i++) 
-        {   
-			serNumCheck ^= serNum[i];
-		}
-		if (serNumCheck != serNum[i]) 
-        {   
-			status = MFRC_522_ERR;    
-		}
-	}
-	return status;
-}
-
-MFRC522_Status_t MFRC522_ToCard(MFRC522_t *RC522_x, uint8_t command, uint8_t *sendData, 
-            uint8_t sendLen, uint8_t *backData, uint16_t *backLen)
-{
-    MFRC522_Status_t status; 
-    uint8_t irqEn = 0x00;
-    uint8_t waitIrq = 0x00;
-    uint8_t temp;
-    uint8_t lastBits;
-
-    switch (command)
-    {
-        case PCD_AUTHENT:     // Certification cards close
-        {
-            irqEn = 0x12;
-            waitIrq = 0x10;
-            break;
-        }
-        case PCD_TRANSCEIVE:  // Transmit FIFO data
-        {
-            irqEn = 0x77;
-            waitIrq = 0x30;
-            break;
-        }
-        default:
+  switch (command)
+  {
+    case PCD_AUTHENT:     // Certification cards close
+      {
+        irqEn = 0x12;
+        waitIRq = 0x10;
         break;
-    }
+      }
+    case PCD_TRANSCEIVE:  // Transmit FIFO data
+      {
+        irqEn = 0x77;
+        waitIRq = 0x30;
+        break;
+      }
+    default:
+      break;
+  }
 
-    MFRC522_Write(RC522_x, CommIEnReg, irqEn | 0x80);       // Interrupt request
-    MFRC522_ClearBIT(RC522_x, CommIrqReg, 0x80);          // Clear all interrupt request bit
-    MFRC522_SetBIT(RC522_x, FIFOLevelReg, 0x80);          // FlushBuffer=1, FIFO Initialization
+  Write_MFRC522(CommIEnReg, irqEn | 0x80);  // Interrupt request
+  ClearBitMask(CommIrqReg, 0x80);         	// Clear all interrupt request bit
+  SetBitMask(FIFOLevelReg, 0x80);         	// FlushBuffer=1, FIFO Initialization
 
-    MFRC522_Write(RC522_x, CommandReg, PCD_IDLE);         // NO action; Cancel the current command
+  Write_MFRC522(CommandReg, PCD_IDLE);    	// NO action; Cancel the current command
 
-    // Writing data to the FIFO
-    for (uint8_t i = 0; i < sendLen; i++)
+  // Writing data to the FIFO
+  for (i=0; i<sendLen; i++)
+  {
+    Write_MFRC522(FIFODataReg, sendData[i]);
+  }
+
+  // Execute the command
+  Write_MFRC522(CommandReg, command);
+  if (command == PCD_TRANSCEIVE)
+  {
+    SetBitMask(BitFramingReg, 0x80);      // StartSend=1,transmission of data starts
+  }
+
+  // Waiting to receive data to complete
+  i = 2000;	// i according to the clock frequency adjustment, the operator M1 card maximum waiting time 25ms
+  do
+  {
+    // CommIrqReg[7..0]
+    // Set1 TxIRq RxIRq IdleIRq HiAlerIRq LoAlertIRq ErrIRq TimerIRq
+    n = Read_MFRC522(CommIrqReg);
+    i--;
+  }
+  while ((i!=0) && (!(n&0x01)) && (!(n&waitIRq)));
+
+  ClearBitMask(BitFramingReg, 0x80);      // StartSend=0
+
+  if (i != 0)
+  {
+    if(!(Read_MFRC522(ErrorReg) & 0x1B))  // BufferOvfl Collerr CRCErr ProtecolErr
     {
-        MFRC522_Write(RC522_x, FIFODataReg, sendData[i]);
-    }
-    
-    // Execute the command
-    if (command == PCD_TRANSCEIVE)
-    {
-       MFRC522_SetBIT(RC522_x, BitFramingReg, 0x80);      // StartSend=1,transmission of data starts
-    }
-    
-    // Waiting to receive data to complete
-    for (uint16_t i = 0; i < 2000; i++)
-    {
-        // i according to the clock frequency adjustment, the operator M1 card maximum waiting time 25ms
-        temp = MFRC522_Read(RC522_x, CommIrqReg);
-        if (!(temp & 0x01) && !(temp & waitIrq))
+      status = MI_OK;
+      if (n & irqEn & 0x01)
+      {
+        status = MI_NOTAGERR;             // ??
+      }
+
+      if (command == PCD_TRANSCEIVE)
+      {
+        n = Read_MFRC522(FIFOLevelReg);
+        lastBits = Read_MFRC522(ControlReg) & 0x07;
+        if (lastBits)
         {
-            break;
+          *backLen = (n-1)*8 + lastBits;
+        }
+        else
+        {
+          *backLen = n*8;
         }
 
-        if (i == 1999)
+        if (n == 0)
         {
-            status = MFRC_522_TIMEOUT;
-            return status;
+          n = 1;
         }
-    }
-    
-    MFRC522_ClearBIT(RC522_x, BitFramingReg, 0x80);      // StartSend=0
+        if (n > MAX_LEN)
+        {
+          n = MAX_LEN;
+        }
 
-    if (!(MFRC522_Read(RC522_x, ErrorReg) & 0x1B))   // BufferOvfl Collerr CRCErr ProtecolErr
+        // Reading the received data in FIFO
+        for (i=0; i<n; i++)
+        {
+          backData[i] = Read_MFRC522(FIFODataReg);
+        }
+      }
+    }
+    else {
+      //printf("~~~ buffer overflow, collerr, crcerr, or protecolerr\r\n");
+      status = MI_ERR;
+    }
+  }
+
+  return status;
+}
+
+
+//---------------------------------------------------------------
+
+/*
+ * Function Name: MFRC522_Anticoll
+ * Description: Anti-collision detection, reading selected card serial number card
+ * Input parameters: serNum - returns 4 bytes card serial number, the first 5 bytes for the checksum byte
+ * Return value: the successful return MI_OK
+ */
+u_char MFRC522_Anticoll(u_char *serNum)
+{
+  u_char status;
+  u_char i;
+  u_char serNumCheck=0;
+  uint unLen;
+
+
+  //ClearBitMask(Status2Reg, 0x08);		//TempSensclear
+  //ClearBitMask(CollReg,0x80);			//ValuesAfterColl
+  Write_MFRC522(BitFramingReg, 0x00);		//TxLastBists = BitFramingReg[2..0]
+
+  serNum[0] = PICC_ANTICOLL;
+  serNum[1] = 0x20;
+  status = MFRC522_ToCard(PCD_TRANSCEIVE, serNum, 2, serNum, &unLen);
+
+  if (status == MI_OK)
+  {
+    //Check card serial number
+    for (i=0; i<4; i++)
     {
-        status =  MFRC_522_OK;
-
-        if (temp & irqEn & 0x01)
-        {
-            status = MFRC_522_UNEXPECTED_EVENT;
-            return status;
-        }
-
-        if (command == PCD_TRANSCEIVE)
-        {
-            temp = MFRC522_Read(RC522_x, FIFOLevelReg);
-            lastBits = MFRC522_Read(RC522_x, ControlReg) & 0x07;
-            if (lastBits)
-            {
-                *backLen = (temp - 1) * 8 + lastBits;
-            }
-            else
-            {
-                *backLen = temp * 8;
-            }
-
-            if (temp == 0)
-            {
-                temp = 1;
-            }
-
-            if (temp > MAX_LEN)
-            {
-                temp = MAX_LEN;
-            }
-
-            for (uint8_t i = 0; i < temp; i++)
-            {
-                backData[i] = MFRC522_Read(RC522_x, FIFODataReg);
-            }
-        }
+      serNumCheck ^= serNum[i];
     }
-    else
+    if (serNumCheck != serNum[i])
     {
-        status = MFRC_522_ERR;
+      status = MI_ERR;
     }
-    return status;
-}
+  }
 
-void MFRC522_Write(MFRC522_t *RC522_x, uint8_t address, uint8_t value)
+  //SetBitMask(CollReg, 0x80);		//ValuesAfterColl=1
+
+  return status;
+}
+//---------------------------------------------------
+
+
+
+/*
+ * Function Name: MFRC522_Read
+ * Description: Read block data
+ * Input parameters: blockAddr - block address; recvData - read block data
+ * Return value: the successful return MI_OK
+ */
+u_char MFRC522_Read(u_char blockAddr, u_char *recvData)
 {
-    uint8_t address_spi = (address << 1) & 0x7E;
-    HAL_GPIO_WritePin(RC522_x->nss.port, RC522_x->nss.pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(RC522_x->spi, &address_spi, 1, 500);
-    HAL_SPI_Transmit(RC522_x->spi, &value, 1, 500);
-    HAL_GPIO_WritePin(RC522_x->nss.port, RC522_x->nss.pin, GPIO_PIN_SET);
+  u_char status;
+  uint unLen;
+
+  recvData[0] = PICC_READ;
+  recvData[1] = blockAddr;
+  CalulateCRC(recvData,2, &recvData[2]);
+  status = MFRC522_ToCard(PCD_TRANSCEIVE, recvData, 4, recvData, &unLen);
+
+  if ((status != MI_OK) || (unLen != 0x90))
+  {
+    status = MI_ERR;
+  }
+
+  return status;
 }
 
-uint8_t MFRC522_Read(MFRC522_t *RC522_x, uint8_t address)
+
+/*
+ * Function Name: MFRC522_Write
+ * Description: Write block data
+ * Input parameters: blockAddr - block address; writeData - to 16-byte data block write
+ * Return value: the successful return MI_OK
+ */
+u_char MFRC522_Write(u_char blockAddr, u_char *writeData)
 {
-    uint8_t address_spi = ((address << 1) & 0x7E) | 0x80;
-    uint8_t rxBuf = 0x00;
+  u_char status;
+  uint recvBits;
+  u_char i;
+  u_char buff[18];
 
-    HAL_GPIO_WritePin(RC522_x->nss.port, RC522_x->nss.pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(RC522_x->spi, &address_spi, 1, 500);
-    HAL_SPI_Receive(RC522_x->spi, &rxBuf, 1, 500);
-    HAL_GPIO_WritePin(RC522_x->nss.port, RC522_x->nss.pin, GPIO_PIN_SET);
-    return rxBuf;
+  buff[0] = PICC_WRITE;
+  buff[1] = blockAddr;
+  CalulateCRC(buff, 2, &buff[2]);
+  status = MFRC522_ToCard(PCD_TRANSCEIVE, buff, 4, buff, &recvBits);
+
+  if ((status != MI_OK))// || (recvBits != 4) || ((buff[0] & 0x0F) != 0x0A))
+  {
+    status = MI_ERR;
+  }
+
+  if (status == MI_OK)
+  {
+    for (i=0; i<16; i++)		//Data to the FIFO write 16Byte
+    {
+      buff[i] = *(writeData+i);
+    }
+    CalulateCRC(buff, 16, &buff[16]);
+    status = MFRC522_ToCard(PCD_TRANSCEIVE, buff, 18, buff, &recvBits);
+
+    if ((status != MI_OK))// || (recvBits != 4) || ((buff[0] & 0x0F) != 0x0A))
+    {
+      status = MI_ERR;
+    }
+  }
+
+  return status;
 }
 
-void MFRC522_Reset(MFRC522_t *RC522_x)
+/*
+ * Function Name: CalulateCRC
+ * Description: CRC calculation with MF522
+ * Input parameters: pIndata - To read the CRC data, len - the data length, pOutData - CRC calculation results
+ * Return value: None
+ */
+void CalulateCRC(u_char *pIndata, u_char len, u_char *pOutData)
 {
-    MFRC522_Write(RC522_x, CommandReg, PCD_RESETPHASE);
+  u_char i, n;
+
+  ClearBitMask(DivIrqReg, 0x04);			//CRCIrq = 0
+  SetBitMask(FIFOLevelReg, 0x80);			//Clear the FIFO pointer
+  //Write_MFRC522(CommandReg, PCD_IDLE);
+
+  //Writing data to the FIFO
+  for (i=0; i<len; i++)
+  {
+    Write_MFRC522(FIFODataReg, *(pIndata+i));
+  }
+  Write_MFRC522(CommandReg, PCD_CALCCRC);
+
+  //Wait CRC calculation is complete
+  i = 0xFF;
+  do
+  {
+    n = Read_MFRC522(DivIrqReg);
+    i--;
+  }
+  while ((i!=0) && !(n&0x04));			//CRCIrq = 1
+
+  //Read CRC calculation result
+  pOutData[0] = Read_MFRC522(CRCResultRegL);
+  pOutData[1] = Read_MFRC522(CRCResultRegM);
 }
 
-void MFRC522_Antenna_On(MFRC522_t *RC522_x)
+//--------------------------------------------------------------
+/*
+ * Function Name: MFRC522_Auth
+ * Description: Verify card password
+ * Input parameters: authMode - Password Authentication Mode
+                 0x60 = A key authentication
+                 0x61 = Authentication Key B
+             BlockAddr--Block address
+             Sectorkey--Sector password
+             serNum--Card serial number, 4-byte
+ * Return value: the successful return MI_OK
+ */
+u_char MFRC522_Auth(u_char authMode, u_char BlockAddr, u_char *Sectorkey, u_char *serNum)
 {
-    MFRC522_SetBIT(RC522_x, TxControlReg, 0x03);
+  u_char status;
+  uint recvBits;
+  u_char i;
+  u_char buff[12];
+
+  //Verify the command block address + sector + password + card serial number
+  buff[0] = authMode;
+  buff[1] = BlockAddr;
+  for (i=0; i<6; i++)
+  {
+    buff[i+2] = *(Sectorkey+i);
+  }
+  for (i=0; i<4; i++)
+  {
+    buff[i+8] = *(serNum+i);
+  }
+  status = MFRC522_ToCard(PCD_AUTHENT, buff, 12, buff, &recvBits);
+
+  if ((status != MI_OK) || (!(Read_MFRC522(Status2Reg) & 0x08)))
+  {
+    status = MI_ERR;
+  }
+
+  return status;
 }
 
-void MFRC522_Antenna_Off(MFRC522_t *RC522_x)
+//----------------------------------
+/*
+ * Function Name: MFRC522_SelectTag
+ * Description: election card, read the card memory capacity
+ * Input parameters: serNum - Incoming card serial number
+ * Return value: the successful return of card capacity
+ */
+u_char MFRC522_SelectTag(u_char *serNum)
 {
-    MFRC522_ClearBIT(RC522_x, TxControlReg, 0x03);
-}
+  u_char i;
+  u_char status;
+  u_char size;
+  uint recvBits;
+  u_char buffer[9];
 
-void MFRC522_SetBIT(MFRC522_t *RC522_x, uint8_t reg, uint8_t bit_mask)
+  //ClearBitMask(Status2Reg, 0x08);			//MFCrypto1On=0
+
+  buffer[0] = PICC_SElECTTAG;
+  buffer[1] = 0x70;
+  for (i=0; i<5; i++)
+  {
+    buffer[i+2] = *(serNum+i);
+  }
+  CalulateCRC(buffer, 7, &buffer[7]);		//??
+  status = MFRC522_ToCard(PCD_TRANSCEIVE, buffer, 9, buffer, &recvBits);
+
+  if ((status == MI_OK) && (recvBits == 0x18))
+  {
+    size = buffer[0];
+  }
+  else
+  {
+    size = 0;
+  }
+
+  return size;
+}
+//----------------------------------------------------
+
+/*
+ * Function Name: MFRC522_Halt
+ * Description: Command card into hibernation
+ * Input: None
+ * Return value: None
+ */
+void MFRC522_Halt(void)
 {
-    uint8_t temp = 0x00;
-    temp = MFRC522_Read(RC522_x, reg);
-    MFRC522_Write(RC522_x, reg, temp | bit_mask);      //set bit
-}
+  u_char status;
+  uint unLen;
+  u_char buff[4];
 
-void MFRC522_ClearBIT(MFRC522_t *RC522_x, uint8_t reg, uint8_t bit_mask)
-{
-    uint8_t temp = 0x00;
-    temp = MFRC522_Read(RC522_x, reg);
-    MFRC522_Write(RC522_x, reg, temp & (~bit_mask));      //clear bit
-}
+  buff[0] = PICC_HALT;
+  buff[1] = 0;
+  CalulateCRC(buff, 2, &buff[2]);
 
-//void MFRC522_Halt(void)
-//{
-//	uint16_t unLen;
-//	uint8_t buff[4];
-//
-//	buff[0] = PICC_HALT;
-//	buff[1] = 0;
-//	MFRC522_CalculateCRC(buff, 2, &buff[2]);
-//
-//	MFRC522_ToCard(PCD_TRANSCEIVE, buff, 4, buff, &unLen);
-//}
+  status = MFRC522_ToCard(PCD_TRANSCEIVE, buff, 4, buff,&unLen);
+  //return status;
+}
+//--------------------------------------
+void MFRC522_StopCrypto1(void) {
+	// Clear MFCrypto1On bit
+	ClearBitMask(Status2Reg, 0x08); // Status2Reg[7..0] bits are: TempSensClear I2CForceHS reserved reserved   MFCrypto1On ModemState[2:0]
+} // End PCD_StopCrypto1()

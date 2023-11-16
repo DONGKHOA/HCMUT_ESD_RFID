@@ -1,15 +1,13 @@
-/*
- * rc522.h
- *
- *  Created on: Oct 1, 2023
- *      Author: khoa dong
- */
+#ifndef MFRC522_H_
+#define MFRC522_H_
 
-#ifndef RC522_H_
-#define RC522_H_
+#include "main.h"
+#include "stm32f1xx_hal.h"
 
-#include "stdint.h"
-
+#define u_char   unsigned char
+#define uint    unsigned int
+#define u8      uint8_t
+#define u16     uint16_t
 //Maximum length of the array
 #define MAX_LEN 16
 
@@ -36,6 +34,13 @@
 # define PICC_RESTORE         0xC2               // transfer block data to the buffer
 # define PICC_TRANSFER        0xB0               // save the data in the buffer
 # define PICC_HALT            0x50               // Sleep
+
+
+//And MF522 The error code is returned when communication
+#define MI_OK                 0
+#define MI_NOTAGERR           1
+#define MI_ERR                2
+
 
 //------------------MFRC522 Register---------------
 //Page 0:Command and Status
@@ -106,42 +111,26 @@
 #define     Reserved32            0x3D
 #define     Reserved33            0x3E
 #define     Reserved34            0x3F
+//-----------------------------------------------
+// function definitions
+void Write_MFRC522(u_char, u_char);
+u_char Read_MFRC522(u_char);
+void SetBitMask(u_char, u_char);
+void ClearBitMask(u_char, u_char);
+void AntennaOn();
+void AntennaOff();
+void MFRC522_Reset();
+void MFRC522_Init();
+u_char MFRC522_Request(u_char, u_char*);
+u_char MFRC522_ToCard(u_char, u_char*, u_char, u_char*, uint*);
+u_char MFRC522_Anticoll(u_char*);
+void CalulateCRC(u_char*, u_char, u_char*);
+u_char MFRC522_SelectTag(u_char*);
+u_char MFRC522_Auth(u_char, u_char, u_char*, u_char*);
+u_char MFRC522_Read(u_char, u_char*);
+u_char MFRC522_Write(u_char, u_char*);
+void MFRC522_Halt();
+void MFRC522_StopCrypto1(void);
 
-typedef struct 
-{
-    uint32_t pin;
-    void *port;
-}MFRC522_gpio_t;
 
-
-typedef struct 
-{
-    MFRC522_gpio_t reset;
-    MFRC522_gpio_t nss;
-    void *spi;
-}MFRC522_t;
-
-typedef enum
-{
-    MFRC_522_OK = 0,
-    MFRC_522_ERR,
-    MFRC_522_TIMEOUT,
-    MFRC_522_UNEXPECTED_EVENT
-}MFRC522_Status_t;
-
-void MFRC522_Init(MFRC522_t *RC522_x);
-MFRC522_Status_t MFRC522_Request(MFRC522_t *RC522_x, uint8_t reqMode, uint8_t *tagType);
-MFRC522_Status_t MFRC522_Check(MFRC522_t *RC522_x, uint8_t* id);
-MFRC522_Status_t MFRC522_Anticoll(MFRC522_t *RC522_x, uint8_t* serNum);
-MFRC522_Status_t MFRC522_ToCard(MFRC522_t *RC522_x, uint8_t command, uint8_t *sendData, 
-            uint8_t sendLen, uint8_t *backData, uint16_t *backLen);
-void MFRC522_Write(MFRC522_t *RC522_x, uint8_t address, uint8_t value);
-uint8_t MFRC522_Read(MFRC522_t *RC522_x, uint8_t address);
-void MFRC522_Reset(MFRC522_t *RC522_x);
-void MFRC522_Antenna_On(MFRC522_t *RC522_x);
-void MFRC522_Antenna_Off(MFRC522_t *RC522_x);
-void MFRC522_SetBIT(MFRC522_t *RC522_x, uint8_t reg, uint8_t bit_mask);
-void MFRC522_ClearBIT(MFRC522_t *RC522_x, uint8_t reg, uint8_t bit_mask);
-void MFRC522_Halt(void);
-
-#endif /* RC522_H_ */
+#endif /* MFRC522_H_ */
