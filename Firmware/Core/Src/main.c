@@ -109,7 +109,16 @@ void admin_mode(uint8_t choice)
 
 void user_mode(void)
 {
-
+  //Display requiring to input user_password once again
+  if (strcmp(password, user_password_store) == 0)
+  {
+    // display unlock successfull
+    // turn on relay
+  }
+  else
+  {
+    
+  }
 }
 
 void card_mode(void)
