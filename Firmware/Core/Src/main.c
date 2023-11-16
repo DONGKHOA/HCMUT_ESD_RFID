@@ -75,12 +75,23 @@ static void MX_SPI2_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+uint8_t SET_bitmask(uint8_t group, uint8_t bit)
+{
+  group |= (1 << bit);
+  return group;
+}
+
+uint8_t CLEAR_bitmask(uint8_t group, uint8_t bit)
+{
+  group &= ~(1 << bit);
+  return group;
+}
 
 void administrator(void)
 {
 	// show selection
 	char temp = 0;
-  if ((flag))
+  if ((flag & (1 << CHANGE_PASSWORD_ADMIN)) )
   {
     
   }
