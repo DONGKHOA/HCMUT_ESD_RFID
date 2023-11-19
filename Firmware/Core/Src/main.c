@@ -196,9 +196,50 @@ void admin_mode(uint8_t choice)
 
 void user_mode(void)
 {
+  // uint8_t block_user = 0;
+  // char re_user_password_store[10];
+  // uint8_t i = 0;
+  // while (1) 
+  // {
+  //   if(block_system < 5)
+	//   {
+  //     if ((flag & (1 << KEYPAD_STATE)) != (1 << KEYPAD_STATE))
+  //     {        
+  //       while(keypad_handle() != NONE_PRESSING_STATE)
+  //       {
+  //         password[i] = keypad_handle();
+  //         i++;
+  //         if(i == 14)
+  //         {
+  //           flag |= (1 << KEYPAD_STATE);
+  //           i = 0;
+  //         }
+  //       }
+  //     }
+        
+  //     if((flag & (1 << KEYPAD_STATE)) == (1 << KEYPAD_STATE))
+  //     {
+  //       uint8_t temp = re_user_password_store[14];
+  //       re_user_password_store[14] = '\0';
+  //       if(strcmp(re_user_password_store, user_password_store) == 0)
+  //       {
+  //         // display successful unlocking
+  //         // turn on relay
+  //       }
+  //       else
+  //       {
+  //         block_user++;
+  //       }
+  //     }
+  //   }
+  //   else        // user_mode blocked
+  //   {
+  //     // block user input password!!!!
+  //   }
+  // }
 
+  .///////turn on relay
 }
-
 void card_mode(void)
 {
 
@@ -432,3 +473,4 @@ void assert_failed(uint8_t *file, uint32_t line)
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
+
