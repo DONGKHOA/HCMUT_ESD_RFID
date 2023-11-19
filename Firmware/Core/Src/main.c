@@ -35,13 +35,17 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 #define KEYPAD_STATE            0
-#define CHANGE_PASSWORD_ADMIN   1
-#define UNBLOCK_USER            2
-#define CHANGE_PASSWORD_USER    3
-#define ADD_NEW_CARD            4
-#define MODE_USER               5
-#define BLOCK_SYSTEM            6
-#define BLOCK_USER              7
+
+#define MODE_ADMIN              1
+  #define ADMINISTRATOR
+    #define CHANGE_PASSWORD_ADMIN   2
+    #define UNBLOCK_USER            3
+  #define CHANGE_PASSWORD_USER    4
+  #define ADD_NEW_CARD            5
+#define MODE_USER               6
+
+#define BLOCK_SYSTEM            7
+#define BLOCK_USER              8
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -56,13 +60,14 @@ SPI_HandleTypeDef hspi2;
 uint8_t status;
 u_char str[MAX_LEN]; // Max_LEN = 16
 uint8_t serNum[5];
-uint8_t flag = 0;
+uint16_t flag = 0;
 uint8_t block_system = 0;
+uint8_t _index = 0;
 
 //Using key pad
-char password[16];
-char admin_password_store[15] = "*#000#12345678";
-char user_password_store[10] = "123456789";
+uint8_t password[15];
+uint8_t admin_password_store[15] = "*#000#12345678";
+uint8_t user_password_store[10] = "123456789";
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -75,41 +80,112 @@ static void MX_SPI2_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-uint8_t SET_bitmask(uint8_t group, uint8_t bit)
+void SET_bitmask(uint16_t* group, uint8_t bit)
 {
-  group |= (1 << bit);
-  return group;
+  *group |= (1 << bit);
 }
 
-uint8_t CLEAR_bitmask(uint8_t group, uint8_t bit)
+void CLEAR_bitmask(uint16_t* group, uint8_t bit)
 {
-  group &= ~(1 << bit);
-  return group;
+  *group &= ~(1 << bit);
 }
 
-void administrator(void)
+void __CHANGE_Password_Admin(void)
 {
-	// show selection
-	char temp = 0;
-  if ((flag & (1 << CHANGE_PASSWORD_ADMIN)) )
+	uint8_t temp = 0;
+  _index = 6;
+  for(uint8_t i = 0; i < 6; i++)
   {
-    
+    password[i] = admin_password_store[i];
   }
-  
-  while (1)
+  // hiện thị yêu cầu mật khẩu admin có 8 kí tự
+  if ((flag & (1 << CHANGE_PASSWORD_ADMIN)) == (1 << CHANGE_PASSWORD_ADMIN))
+  {    
+    while (1)
+    {
+      temp = keypad_handle();
+      if(temp != NONE_PRESSING_STATE)
+      {
+            password[_index] = temp;
+            if(_index == 14)
+            {
+              ClearBitMask(&flag, CHANGE_PASSWORD_ADMIN);
+              _index = 0;
+              break;
+            }
+            _index++;
+      }
+    }
+  }
+  //hiên thị nhấn # để xác nhận rồi quay lại màn hình lựa chọn của admin
+  //hoặc nhấn * để quay lại (màn hình đổi mật khẩu)
+  while(1)
   {
-	  temp = keypad_handle();
-    
+    temp = keypad_handle();
+    if(temp == '#')
+    {
+      memcpy(admin_password_store, password, sizeof(admin_password_store));
+      break;
+    }
+    else if(temp = '*')
+    {
+      SetBitMask(flag, CHANGE_PASSWORD_ADMIN);
+      break;
+    }
   }
-  
+}
+
+void __UNBLOCK_User(void)
+{
+  if((flag & (1 <<UNBLOCK_USER)) == (1 << UNBLOCK_USER))
+  {
+    // nhấn # để unblock user rồi quay lại màn hình lựa chọn của admin
+    // nhấn * rồi quay lại màn hình quản trị viên (administrator)
+    uint8_t temp = 0;
+    while(1)
+    {
+      temp = keypad_handle();
+      if(temp == '#')
+      {
+        block_system = 0;
+      }
+      else if(temp == '*')
+      {
+        ClearBitMask(flag, UNBLOCK_USER);
+        SetBitMask(flag, )
+      }
+    }
+  }
+}
+
+void _administrator(void)
+{
+	// hiện thị lựa chọn
+  //1.đổi mật khẩu admin
+  //2. mở khóa user
+  uint8_t selection = 0;
+  selection = keypad_handle();
+  if(selection == '1')
+  {
+    SetBitMask(flag, CHANGE_PASSWORD_ADMIN);
+    __CHANGE_Password_Admin();
+  }
+  else if(selection == '2')
+  {
+    SetBitMask(flag, CHANGE_PASSWORD_ADMIN);
+  }
 }
 
 void admin_mode(uint8_t choice)
 {
+  // hiển thị chọn mode trong admin mode
+  //1.change password admin
+  //2.Unblock user
+  //3. thêm / bớt thẻ
 	  switch(choice)
 	  {
 	  case '1':
-		  administrator();
+      _administrator();
 		  break;
 	  case '2':
 		  break;
@@ -169,34 +245,23 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-//		status = MFRC522_Request(PICC_REQIDL, str);	//MFRC522_Request(0x26, str)
-//		if(status == MI_OK)
-//		{
-//			status = MFRC522_Anticoll(str);//Take a collision, look up 5 bytes
-//			memcpy(serNum, str, 5);//function for c language:(para1:that place save data,para2:the the source of data,para3:size)
-//		}
-//
-//		if (status == MI_OK)
-//		{
-//		  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13,	0);
-//		}
-//		  else
-//		  {
-//			  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13,	1);
-//		  }
-	  uint8_t _index = 0;
 	  if(block_system < 5)
 	  {
       if ((flag & (1 << KEYPAD_STATE)) != (1 << KEYPAD_STATE))
       {        
-        while(keypad_handle() != NONE_PRESSING_STATE)
+        while(1)
         {
-          password[_index] = keypad_handle();
-          _index++;
-          if(_index == 14)
+          uint8_t temp = keypad_handle();
+          if(temp != NONE_PRESSING_STATE)
           {
-            flag |= (1 << KEYPAD_STATE);
-            _index = 0;
+            password[_index] = temp;
+            if(_index == 14)
+            {
+              SetBitMask(&flag, KEYPAD_STATE);
+              _index = 0;
+              break;
+            }
+            _index++;
           }
         }
       }
@@ -223,6 +288,7 @@ int main(void)
 	  else
 	  {
 		  // store state block system in eeprom
+      SetBitMask(flag, BLOCK_USER);
 	  }
   }
   /* USER CODE END 3 */

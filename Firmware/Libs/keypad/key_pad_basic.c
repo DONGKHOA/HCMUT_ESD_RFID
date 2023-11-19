@@ -76,9 +76,9 @@ uint8_t keypad_scan()
   return NONE_PRESSING_STATE;
 }
 
-char keypad_handle ()
+uint8_t keypad_handle ()
 {
-	char keys[12] = {'1','2','3','4','5','6','7','8','9','*','0','#'};
+	uint8_t keys[12] = {'1','2','3','4','5','6','7','8','9','*','0','#'};
 	keyPad_State_t key_current;
 	keyPad_State_t key_last = NONE_PRESSING_STATE;
 	uint8_t key_debouncing = NONE_PRESSING_STATE;
@@ -105,15 +105,9 @@ char keypad_handle ()
 	{
 		if(key_current != NONE_PRESSING_STATE)
 		{
-//			keypad_pressing_callback(key_current);
 			return keys[key];
 		}
 		key_last = key_current;
 	}
+  return key;
 }
-
-//char keypad_pressing_callback (uint8_t key)
-//{
-//
-//}
-

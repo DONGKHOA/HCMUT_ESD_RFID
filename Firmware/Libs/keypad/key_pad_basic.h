@@ -12,7 +12,7 @@ typedef enum
 }keyPad_State_t;
 
 void keypad_init(void);
-char keypad_handle ();
+uint8_t keypad_handle ();
 uint8_t keypad_scan();
 
 #endif
