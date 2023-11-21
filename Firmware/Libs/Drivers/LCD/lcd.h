@@ -77,7 +77,7 @@ typedef struct
 	uint8_t FUNCTIONSET;
 }LCD_Name;
 
-void lcd_init(LCD_NAME* LCD, uint8_t colum, uint8_t row, 
+void lcd_init(LCD_Name* LCD, uint8_t colum, uint8_t row,
 									GPIO_TypeDef* RS_PORT, uint16_t RS_PIN, GPIO_TypeDef* EN_PORT, uint16_t EN_PIN,
 									GPIO_TypeDef* D0_PORT, uint16_t D0_PIN, GPIO_TypeDef* D1_PORT, uint16_t D1_PIN,
 									GPIO_TypeDef* D2_PORT, uint16_t D2_PIN, GPIO_TypeDef* D3_PORT, uint16_t D3_PIN,
@@ -87,4 +87,4 @@ void lcd_init(LCD_NAME* LCD, uint8_t colum, uint8_t row,
 void lcd_set_cursor(LCD_Name* LCD, uint8_t colum, uint8_t row);
 void lcd_write_char(LCD_Name* LCD, char character);
 void lcd_write_string(LCD_Name* LCD, char *String);
-void lcd_clear(LCD_Name* LCD)
+void lcd_clear(LCD_Name* LCD);

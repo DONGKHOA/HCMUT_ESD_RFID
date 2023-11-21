@@ -117,7 +117,7 @@ void __CHANGE_Password_Admin(void)
       }
     }
   }
-  //hiên thị nhấn # để xác nhận rồi quay lại màn hình lựa chọn của admin
+  //hiên thị nhấn # để xác nhận rồi quay lại màn hình lựa ch�?n của admin
   //hoặc nhấn * để quay lại (màn hình đổi mật khẩu)
   while(1)
   {
@@ -139,7 +139,7 @@ void __UNBLOCK_User(void)
 {
   if((flag & (1 <<UNBLOCK_USER)) == (1 << UNBLOCK_USER))
   {
-    // nhấn # để unblock user rồi quay lại màn hình lựa chọn của admin
+    // nhấn # để unblock user rồi quay lại màn hình lựa ch�?n của admin
     // nhấn * rồi quay lại màn hình quản trị viên (administrator)
     uint8_t temp = 0;
     while(1)
@@ -152,7 +152,6 @@ void __UNBLOCK_User(void)
       else if(temp == '*')
       {
         ClearBitMask(flag, UNBLOCK_USER);
-        SetBitMask(flag, )
       }
     }
   }
@@ -160,7 +159,7 @@ void __UNBLOCK_User(void)
 
 void _administrator(void)
 {
-	// hiện thị lựa chọn
+	// hiện thị lựa ch�?n
   //1.đổi mật khẩu admin
   //2. mở khóa user
   uint8_t selection = 0;
@@ -178,7 +177,7 @@ void _administrator(void)
 
 void admin_mode(uint8_t choice)
 {
-  // hiển thị chọn mode trong admin mode
+  // hiển thị ch�?n mode trong admin mode
   //1.change password admin
   //2.Unblock user
   //3. thêm / bớt thẻ
@@ -238,7 +237,7 @@ void user_mode(void)
   //   }
   // }
 
-  .///////turn on relay
+  ///////turn on relay
 }
 void card_mode(void)
 {
@@ -473,4 +472,3 @@ void assert_failed(uint8_t *file, uint32_t line)
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
-

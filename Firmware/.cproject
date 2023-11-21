@@ -46,9 +46,11 @@
 									<listOptionValue builtIn="false" value="../Drivers/STM32F1xx_HAL_Driver/Inc"/>
 									<listOptionValue builtIn="false" value="../Drivers/CMSIS/Device/ST/STM32F1xx/Include"/>
 									<listOptionValue builtIn="false" value="../Drivers/CMSIS/Include"/>
-									<listOptionValue builtIn="false" value="&quot;E:\Design Embedded System\HCMUT_ESD_RFID\Firmware\Libs\RC522&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;C:\STM32\HCMUT_ESD_RFID\Firmware\Libs\keypad&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;E:\Design Embedded System\HCMUT_ESD_RFID\Firmware\Libs\keypad&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;E:\Design Embedded System\HCMUT_ESD_RFID\Firmware\Libs\Drivers\KEYPAD&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;E:\Design Embedded System\HCMUT_ESD_RFID\Firmware\Libs\Drivers\LCD&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;E:\Design Embedded System\HCMUT_ESD_RFID\Firmware\Libs\Drivers\MFRC522&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;E:\Design Embedded System\HCMUT_ESD_RFID\Firmware\Libs\App\DISPLAY_INFORMATION&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;E:\Design Embedded System\HCMUT_ESD_RFID\Firmware\Libs\App\MENU_MODE&quot;"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.781879846" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>
@@ -76,10 +78,8 @@
 					</folderInfo>
 					<sourceEntries>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Libs/keypad"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
-						<entry excluding="keypad|RC522" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Libs"/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Libs/RC522"/>
+						<entry excluding="Drivers/RC522|keypad|RC522" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Libs"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -153,10 +153,8 @@
 					</folderInfo>
 					<sourceEntries>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Libs/keypad"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
-						<entry excluding="keypad|RC522" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Libs"/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Libs/RC522"/>
+						<entry excluding="Drivers/RC522|keypad|RC522" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Libs"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

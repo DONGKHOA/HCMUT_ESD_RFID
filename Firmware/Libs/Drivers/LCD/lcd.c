@@ -1,4 +1,4 @@
-#include "LCD.h"
+#include "lcd.h"
 
 static void delay_us(uint32_t us)
 {
@@ -35,7 +35,7 @@ static void lcd_write_data(LCD_Name* LCD, uint8_t data, uint8_t mode)
 	delay_us(1);
 }
 
-void lcd_init(LCD_NAME* LCD, uint8_t colum, uint8_t row, 
+void lcd_init(LCD_Name* LCD, uint8_t colum, uint8_t row,
 									GPIO_TypeDef* RS_PORT, uint16_t RS_PIN, GPIO_TypeDef* EN_PORT, uint16_t EN_PIN,
 									GPIO_TypeDef* D0_PORT, uint16_t D0_PIN, GPIO_TypeDef* D1_PORT, uint16_t D1_PIN,
 									GPIO_TypeDef* D2_PORT, uint16_t D2_PIN, GPIO_TypeDef* D3_PORT, uint16_t D3_PIN,

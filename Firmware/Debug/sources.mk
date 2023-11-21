@@ -25,6 +25,9 @@ SUBDIRS := \
 Core/Src \
 Core/Startup \
 Drivers/STM32F1xx_HAL_Driver/Src \
-Libs/RC522 \
-Libs/keypad \
+Libs/App/DISPLAY_INFORMATION \
+Libs/App/MENU_MODE \
+Libs/Drivers/KEYPAD \
+Libs/Drivers/LCD \
+Libs/Drivers/MFRC522 \
 
