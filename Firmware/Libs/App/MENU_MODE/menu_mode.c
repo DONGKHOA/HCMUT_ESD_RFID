@@ -56,8 +56,14 @@ state_door_t USER_Mode(uint8_t *pass)
     // enter password from keypad
     if(memcmp(pass, password_user, sizeof(password_user)) == 0)
     {
+        DISPLAY_Open_Door(&lcd_0);
         incorrect_enter_pass_user_u8 = 0;
         return OPEN_DOOR;
+    }
+    else
+    {
+        DISPLAY_ReEnter_Password(&lcd_0);
+        return CLOSE_DOOR;
     }
     
     //user use card
@@ -73,10 +79,12 @@ state_door_t USER_Mode(uint8_t *pass)
         }
         if(j == 4)
         {
+            DISPLAY_Open_Door(&lcd_0);
             incorrect_enter_pass_user_u8 = 0;
             return OPEN_DOOR;
         }
     }
+    DISPLAY_ReSwipe_Card(&lcd_0);
     incorrect_enter_pass_user_u8++;
     return CLOSE_DOOR;
 }
