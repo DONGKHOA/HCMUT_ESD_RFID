@@ -25,6 +25,7 @@
 #include "memory.h"
 #include "string.h"
 #include "key_pad_basic.h"
+#include "lcd.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -57,17 +58,7 @@
 SPI_HandleTypeDef hspi2;
 
 /* USER CODE BEGIN PV */
-uint8_t status;
-u_char str[MAX_LEN]; // Max_LEN = 16
-uint8_t serNum[5];
-uint16_t flag = 0;
-uint8_t block_system = 0;
-uint8_t _index = 0;
-
-//Using key pad
-uint8_t password[15];
-uint8_t admin_password_store[15] = "*#000#12345678";
-uint8_t user_password_store[10] = "123456789";
+LCD_Name lcd_0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/

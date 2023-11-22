@@ -3,14 +3,12 @@
 
 #include "stdint.h"
 
-uint8_t password_user[10] = "1234567890";
-uint8_t password_admin[15] = "*#000#12345678";
-
 typedef enum
 {
     BLOCK_USER,
     BLOCK_ADMIN,
-    OPEN_DOOR
+    OPEN_DOOR,
+    CLOSE_DOOR
 }state_door_t;
 
 void Init_Door(void);
