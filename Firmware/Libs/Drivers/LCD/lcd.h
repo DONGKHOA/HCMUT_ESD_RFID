@@ -3,6 +3,8 @@
 
 #include "stm32f1xx_hal.h"
 
+extern TIM_HandleTypeDef htim2;
+
 // constant
 #define LCD_COMMAND     0x00
 #define LCD_DATA        0x01
@@ -88,3 +90,5 @@ void lcd_set_cursor(LCD_Name* LCD, uint8_t colum, uint8_t row);
 void lcd_write_char(LCD_Name* LCD, char character);
 void lcd_write_string(LCD_Name* LCD, char *String);
 void lcd_clear(LCD_Name* LCD);
+
+#endif
