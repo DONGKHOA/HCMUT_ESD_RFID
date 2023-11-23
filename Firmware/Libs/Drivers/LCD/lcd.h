@@ -79,6 +79,7 @@ typedef struct
 	uint8_t FUNCTIONSET;
 }LCD_Name;
 
+void delay_us(uint32_t us);
 void lcd_init(LCD_Name* LCD, uint8_t colum, uint8_t row,
 									GPIO_TypeDef* RS_PORT, uint16_t RS_PIN, GPIO_TypeDef* EN_PORT, uint16_t EN_PIN,
 									GPIO_TypeDef* D0_PORT, uint16_t D0_PIN, GPIO_TypeDef* D1_PORT, uint16_t D1_PIN,

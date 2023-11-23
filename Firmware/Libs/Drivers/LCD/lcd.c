@@ -1,6 +1,6 @@
 #include "lcd.h"
 
-static void delay_us(uint32_t us)
+void delay_us(uint32_t us)
 {
 	htim2.Instance->CNT = 0;
 	HAL_TIM_Base_Start(&htim2);
