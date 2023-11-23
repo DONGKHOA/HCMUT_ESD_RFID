@@ -12,6 +12,7 @@ RM := rm -rf
 -include Libs/Drivers/MFRC522/subdir.mk
 -include Libs/Drivers/LCD/subdir.mk
 -include Libs/Drivers/KEYPAD/subdir.mk
+-include Libs/Drivers/FLASH_MEMORY/subdir.mk
 -include Libs/App/MENU_MODE/subdir.mk
 -include Libs/App/DISPLAY_INFORMATION/subdir.mk
 -include Drivers/STM32F1xx_HAL_Driver/Src/subdir.mk
@@ -65,8 +66,8 @@ all: main-build
 main-build: RFID_DOOR.elf secondary-outputs
 
 # Tool invocations
-RFID_DOOR.elf RFID_DOOR.map: $(OBJS) $(USER_OBJS) E:\Design\ Embedded\ System\HCMUT_ESD_RFID\Firmware\STM32F103C8TX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "RFID_DOOR.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"E:\Design Embedded System\HCMUT_ESD_RFID\Firmware\STM32F103C8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="RFID_DOOR.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+RFID_DOOR.elf RFID_DOOR.map: $(OBJS) $(USER_OBJS) C:\STM32\HCMUT_ESD_RFID\Firmware\STM32F103C8TX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "RFID_DOOR.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"C:\STM32\HCMUT_ESD_RFID\Firmware\STM32F103C8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="RFID_DOOR.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

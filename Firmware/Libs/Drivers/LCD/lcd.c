@@ -2,6 +2,7 @@
 
 void delay_us(uint32_t us)
 {
+	//Prescaler = 71   		//Period = 65535
 	htim2.Instance->CNT = 0;
 	HAL_TIM_Base_Start(&htim2);
 	while(htim2.Instance->CNT < us);
@@ -28,11 +29,11 @@ static void lcd_write_data(LCD_Name* LCD, uint8_t data, uint8_t mode)
 	HAL_GPIO_WritePin(LCD->D7_PORT, LCD->D7_PIN, data >> 7&0x01 ? GPIO_PIN_SET : GPIO_PIN_RESET);
 	
 	HAL_GPIO_WritePin(LCD->EN_PORT, LCD->EN_PIN, GPIO_PIN_RESET);
-	delay_us(1);
+	delay_us(1000);
 	HAL_GPIO_WritePin(LCD->EN_PORT, LCD->EN_PIN, GPIO_PIN_SET);
-	delay_us(1);
+	delay_us(1000);
 	HAL_GPIO_WritePin(LCD->EN_PORT, LCD->EN_PIN, GPIO_PIN_RESET);
-	delay_us(1);
+	delay_us(1000);
 }
 
 void lcd_init(LCD_Name* LCD, uint8_t colum, uint8_t row,
@@ -65,7 +66,7 @@ void lcd_init(LCD_Name* LCD, uint8_t colum, uint8_t row,
 	LCD->D6_PIN = D6_PIN;
 	LCD->D7_PORT = D7_PORT;
 	LCD->D7_PIN = D7_PIN;
-	delay_us(50);
+	delay_us(50000);
 	LCD->FUNCTIONSET = LCD_FUNCTION_SET|LCD_8BITMODE|LCD_2LINE|LCD_5x8DOTS;
 	LCD->ENTRYMODE = LCD_ENTRY_MODE_SET|LCD_ENTRY_LEFT|LCD_ENTRY_SHIFT_DECREMENT;
 	LCD->DISPLAYCTRL = LCD_DISPLAY_CONTROL|LCD_DISPLAY_ON|LCD_CURSOR_OFF|LCD_BLINK_OFF;
@@ -109,5 +110,5 @@ void lcd_write_string(LCD_Name* LCD, char *String)
 void lcd_clear(LCD_Name* LCD)
 {
 	lcd_write_data(LCD, LCD_CLEAR_DISPLAY, LCD_COMMAND);
-	delay_us(5);
+	delay_us(5000);
 }

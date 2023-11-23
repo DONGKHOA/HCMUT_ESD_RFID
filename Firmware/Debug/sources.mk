@@ -27,6 +27,7 @@ Core/Startup \
 Drivers/STM32F1xx_HAL_Driver/Src \
 Libs/App/DISPLAY_INFORMATION \
 Libs/App/MENU_MODE \
+Libs/Drivers/FLASH_MEMORY \
 Libs/Drivers/KEYPAD \
 Libs/Drivers/LCD \
 Libs/Drivers/MFRC522 \

@@ -21,6 +21,7 @@
 "./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim_ex.o"
 "./Libs/App/DISPLAY_INFORMATION/display_information.o"
 "./Libs/App/MENU_MODE/menu_mode.o"
+"./Libs/Drivers/FLASH_MEMORY/flash_memory.o"
 "./Libs/Drivers/KEYPAD/key_pad_basic.o"
 "./Libs/Drivers/LCD/lcd.o"
 "./Libs/Drivers/MFRC522/rc522.o"
