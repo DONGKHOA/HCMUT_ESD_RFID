@@ -21,5 +21,4 @@ void DISPLAY_ReSwipe_Card(LCD_Name *lcd_p);
 void DISPLAY_Card_Added(LCD_Name *lcd_p);
 void DISPLAY_CardExists_DeleteCard(LCD_Name *lcd_p);
 
-
 #endif
