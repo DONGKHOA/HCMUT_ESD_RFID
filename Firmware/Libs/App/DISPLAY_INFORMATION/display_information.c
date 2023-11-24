@@ -2,11 +2,10 @@
 #include "lcd.h"
 #include "main.h"
 
-<<<<<<< HEAD
 
 void DISPLAY_Init_Door(LCD_Name *lcd_p);
 void DISPLAY_Open_Door(LCD_Name *lcd_p);
-=======
+
 #define Write_Pin_Led(x) 	\
 	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, x)
 #define Write_Pin_Buzzer(x) \
@@ -29,7 +28,7 @@ void DISPLAY_Open_Door(LCD_Name *lcd_p)
 	Write_Pin_Led(0);
 	Write_Pin_Buzzer(0);
 }
->>>>>>> 0bf0704ae8aeeb7026c5deaa555cf76fc45861c6
+
 void DISPLAY_ReEnter_Password(LCD_Name *lcd_p);
 void DISPLAY_Block_User(LCD_Name *lcd_p);
 void DISPLAY_Admin_Mode(LCD_Name *lcd_p);
