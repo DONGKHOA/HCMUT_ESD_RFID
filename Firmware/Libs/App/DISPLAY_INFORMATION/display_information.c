@@ -1,8 +1,35 @@
 #include "display_information.h"
+#include "lcd.h"
+#include "main.h"
 
+<<<<<<< HEAD
 
 void DISPLAY_Init_Door(LCD_Name *lcd_p);
 void DISPLAY_Open_Door(LCD_Name *lcd_p);
+=======
+#define Write_Pin_Led(x) 	\
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, x)
+#define Write_Pin_Buzzer(x) \
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, x)
+
+void DISPLAY_Init_Door(LCD_Name *lcd_p)
+{
+	lcd_set_cursor(lcd_p, 0, 0);
+	lcd_write_string(lcd_p, "Scan your card");
+}
+void DISPLAY_Open_Door(LCD_Name *lcd_p)
+{
+	lcd_set_cursor(lcd_p, 5, 0);
+	lcd_write_string(lcd_p, "Unlocked");
+	lcd_set_cursor(lcd_p, 4, 1);
+	lcd_write_string(lcd_p, "Successfully!");
+	Write_Pin_Led(1);
+	Write_Pin_Buzzer(1);
+	delay_us(100000);
+	Write_Pin_Led(0);
+	Write_Pin_Buzzer(0);
+}
+>>>>>>> 0bf0704ae8aeeb7026c5deaa555cf76fc45861c6
 void DISPLAY_ReEnter_Password(LCD_Name *lcd_p);
 void DISPLAY_Block_User(LCD_Name *lcd_p);
 void DISPLAY_Admin_Mode(LCD_Name *lcd_p);
