@@ -22,10 +22,10 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "rc522.h"
-#include "memory.h"
-#include "string.h"
 #include "key_pad_basic.h"
 #include "lcd.h"
+#include "menu_mode.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -36,13 +36,12 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 #define KEYPAD_STATE            0
-
 #define MODE_ADMIN              1
-  #define ADMINISTRATOR
-    #define CHANGE_PASSWORD_ADMIN   2
-    #define UNBLOCK_USER            3
-  #define CHANGE_PASSWORD_USER    4
-  #define ADD_NEW_CARD            5
+#define ADMINISTRATOR
+#define CHANGE_PASSWORD_ADMIN   2
+#define UNBLOCK_USER            3
+#define CHANGE_PASSWORD_USER    4
+#define ADD_NEW_CARD            5
 #define MODE_USER               6
 
 #define BLOCK_SYSTEM            7
@@ -59,6 +58,7 @@ SPI_HandleTypeDef hspi2;
 
 /* USER CODE BEGIN PV */
 LCD_Name lcd_0;
+uint8_t condition = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -71,169 +71,26 @@ static void MX_SPI2_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-void SET_bitmask(uint16_t* group, uint8_t bit)
+uint8_t ENTER_Password(uint8_t *data_keypad)
 {
-  *group |= (1 << bit);
-}
-
-void CLEAR_bitmask(uint16_t* group, uint8_t bit)
-{
-  *group &= ~(1 << bit);
-}
-
-void __CHANGE_Password_Admin(void)
-{
-	uint8_t temp = 0;
-  _index = 6;
-  for(uint8_t i = 0; i < 6; i++)
-  {
-    password[i] = admin_password_store[i];
-  }
-  // hiện thị yêu cầu mật khẩu admin có 8 kí tự
-  if ((flag & (1 << CHANGE_PASSWORD_ADMIN)) == (1 << CHANGE_PASSWORD_ADMIN))
-  {    
-    while (1)
+    uint8_t dest = 0;
+    uint8_t data = 0;
+    data = keypad_handle();
+    if (data != NONE_PRESSING_STATE)
     {
-      temp = keypad_handle();
-      if(temp != NONE_PRESSING_STATE)
-      {
-            password[_index] = temp;
-            if(_index == 14)
-            {
-              ClearBitMask(&flag, CHANGE_PASSWORD_ADMIN);
-              _index = 0;
-              break;
-            }
-            _index++;
-      }
+        if ((data == '#') || (data == '*'))
+        {
+          return data;
+        }
+        *(data_keypad + dest) = data;
     }
-  }
-  //hiên thị nhấn # để xác nhận rồi quay lại màn hình lựa ch�?n của admin
-  //hoặc nhấn * để quay lại (màn hình đổi mật khẩu)
-  while(1)
-  {
-    temp = keypad_handle();
-    if(temp == '#')
-    {
-      memcpy(admin_password_store, password, sizeof(admin_password_store));
-      break;
-    }
-    else if(temp = '*')
-    {
-      SetBitMask(flag, CHANGE_PASSWORD_ADMIN);
-      break;
-    }
-  }
 }
 
-void __UNBLOCK_User(void)
-{
-  if((flag & (1 <<UNBLOCK_USER)) == (1 << UNBLOCK_USER))
-  {
-    // nhấn # để unblock user rồi quay lại màn hình lựa ch�?n của admin
-    // nhấn * rồi quay lại màn hình quản trị viên (administrator)
-    uint8_t temp = 0;
-    while(1)
-    {
-      temp = keypad_handle();
-      if(temp == '#')
-      {
-        block_system = 0;
-      }
-      else if(temp == '*')
-      {
-        ClearBitMask(flag, UNBLOCK_USER);
-      }
-    }
-  }
-}
-
-void _administrator(void)
-{
-	// hiện thị lựa ch�?n
-  //1.đổi mật khẩu admin
-  //2. mở khóa user
-  uint8_t selection = 0;
-  selection = keypad_handle();
-  if(selection == '1')
-  {
-    SetBitMask(flag, CHANGE_PASSWORD_ADMIN);
-    __CHANGE_Password_Admin();
-  }
-  else if(selection == '2')
-  {
-    SetBitMask(flag, CHANGE_PASSWORD_ADMIN);
-  }
-}
-
-void admin_mode(uint8_t choice)
-{
-  // hiển thị ch�?n mode trong admin mode
-  //1.change password admin
-  //2.Unblock user
-  //3. thêm / bớt thẻ
-	  switch(choice)
-	  {
-	  case '1':
-      _administrator();
-		  break;
-	  case '2':
-		  break;
-	  case '3':
-		  break;
-	  }
-}
-
-void user_mode(void)
-{
-  // uint8_t block_user = 0;
-  // char re_user_password_store[10];
-  // uint8_t i = 0;
-  // while (1) 
-  // {
-  //   if(block_system < 5)
-	//   {
-  //     if ((flag & (1 << KEYPAD_STATE)) != (1 << KEYPAD_STATE))
-  //     {        
-  //       while(keypad_handle() != NONE_PRESSING_STATE)
-  //       {
-  //         password[i] = keypad_handle();
-  //         i++;
-  //         if(i == 14)
-  //         {
-  //           flag |= (1 << KEYPAD_STATE);
-  //           i = 0;
-  //         }
-  //       }
-  //     }
-        
-  //     if((flag & (1 << KEYPAD_STATE)) == (1 << KEYPAD_STATE))
-  //     {
-  //       uint8_t temp = re_user_password_store[14];
-  //       re_user_password_store[14] = '\0';
-  //       if(strcmp(re_user_password_store, user_password_store) == 0)
-  //       {
-  //         // display successful unlocking
-  //         // turn on relay
-  //       }
-  //       else
-  //       {
-  //         block_user++;
-  //       }
-  //     }
-  //   }
-  //   else        // user_mode blocked
-  //   {
-  //     // block user input password!!!!
-  //   }
-  // }
-
-  ///////turn on relay
-}
-void card_mode(void)
+void task_handle(void)
 {
 
 }
+
 /* USER CODE END 0 */
 
 /**
@@ -266,7 +123,8 @@ int main(void)
   MX_GPIO_Init();
   MX_SPI2_Init();
   /* USER CODE BEGIN 2 */
-
+  Init_Door();
+  keypad_init();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -276,51 +134,7 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  if(block_system < 5)
-	  {
-      if ((flag & (1 << KEYPAD_STATE)) != (1 << KEYPAD_STATE))
-      {        
-        while(1)
-        {
-          uint8_t temp = keypad_handle();
-          if(temp != NONE_PRESSING_STATE)
-          {
-            password[_index] = temp;
-            if(_index == 14)
-            {
-              SetBitMask(&flag, KEYPAD_STATE);
-              _index = 0;
-              break;
-            }
-            _index++;
-          }
-        }
-      }
-      
-		  if((flag & (1 << KEYPAD_STATE)) == (1 << KEYPAD_STATE))
-		  {
-			  uint8_t temp = password[14];
-			  password[14] = '\0';
-			  if(strcmp(password, admin_password_store) == 0)
-			  {
-				  admin_mode(temp);
-
-			  }
-			  else if (strcmp(password, user_password_store) == 0)
-			  {
-
-			  }
-			  else
-			  {
-				  block_system++;
-			  }
-		  }
-	  }
-	  else
-	  {
-		  // store state block system in eeprom
-      SetBitMask(flag, BLOCK_USER);
-	  }
+    task_handle();
   }
   /* USER CODE END 3 */
 }
