@@ -168,34 +168,17 @@ uint8_t _Administrator(void)
     return state_keypad_temp;
 }
 
-state_door_t __Change_password_admin(void)
+state_door_t __Change_password_admin(uint8_t *password, uint8_t change_state)
 {
     DISPLAY_Change_Password_Admin(&lcd_0);
-    uint8_t state_keypad_temp = (uint8_t)NONE_PRESSING_STATE;
-
-    uint8_t dest = 0;
-    uint8_t data = 0;
-    uint8_t data_keypad[10];
-    while (1)
+    if (change_state == '#')
     {
-        data = keypad_handle();
-        if (data != NONE_PRESSING_STATE)
-        {
-            if ((data == '#') || (data == '*'))
-            {
-                break;
-            }
-            
-            *(data_keypad + dest) = data;
-        }   
-    }
-    if (data == '#')
-    {
-        // nhấn # để xác nhận và lưu
+        // nhấn # để xác nhận và lưu password
         DISPLAY_Success_Notification(&lcd_0);
         return STATE_END;
     }
-    if (data == '*')
+    
+    if (change_state == '*')
     {
         return STATE_FORWARD;
     }
@@ -224,34 +207,17 @@ state_door_t __Unblock_User(uint8_t number_enter_password)
     }
 }
 
-state_door_t _Change_password_user(uint8_t *password)
+state_door_t _Change_password_user(uint8_t *password, uint8_t change_state)
 {
     DISPLAY_Change_Password_User(&lcd_0);
-    uint8_t state_keypad_temp = (uint8_t)NONE_PRESSING_STATE;
-
-    uint8_t dest = 0;
-    uint8_t data = 0;
-    uint8_t data_keypad[10];
-    while (1)
+    if (change_state == '#')
     {
-        data = keypad_handle();
-        if (data != NONE_PRESSING_STATE)
-        {
-            if ((data == '#') || (data == '*'))
-            {
-                break;
-            }
-            
-            *(data_keypad + dest) = data;
-        }   
-    }
-    if (data == '#')
-    {
-        // nhấn # để xác nhận và lưu
+        // nhấn # để xác nhận và lưu password
         DISPLAY_Success_Notification(&lcd_0);
         return STATE_END;
     }
-    if (data == '*')
+
+    if (change_state == '*')
     {
         return STATE_FORWARD;
     }
