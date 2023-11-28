@@ -102,3 +102,4 @@ SPI2.VirtualNSS=VM_NSSHARD
 SPI2.VirtualType=VM_MASTER
 board=custom
 isbadioc=false
+isbadioc=false
