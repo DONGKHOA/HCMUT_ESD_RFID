@@ -1,3 +1,0 @@
-../Libs/Drivers/KEYPAD/key_pad_basic.c:20:6:keypad_init	1
-../Libs/Drivers/KEYPAD/key_pad_basic.c:40:9:keypad_scan	10
-../Libs/Drivers/KEYPAD/key_pad_basic.c:79:9:keypad_handle	6
