@@ -11,14 +11,15 @@
 #include "flash_memory.h"
 #include "display_information.h"
 #include "key_pad_basic.h"
+#include "lcd.h"
 
 /*********************
  *      DEFINES
  *********************/
 // tạm thời sửa sau (chỉ lựa chọn địa chỉ từ 08001A10)
 // recommended 0x0801fc00
-#define ADDRESS_STORE_PASSWORD_ADMIN 0X0000
-#define ADDRESS_STORE_PASSWORD_USER 0X0000
+#define ADDRESS_STORE_PASSWORD_ADMIN 0x0801FC10		//*******SUA LAI SAU///
+#define ADDRESS_STORE_PASSWORD_USER 0x0801FC00
 #define ADDRESS_START_STORE_UID 0X0000
 
 #define INIT_PASSWORD 1
@@ -50,7 +51,7 @@ static uint8_t uid_card[5][4];
 
 #if INIT_PASSWORD
 static uint8_t password_use_init[10] = "1234567890";
-static uint8_t password_admin_init[15] = "*#000#12345678";
+static uint8_t password_admin_init[14] = "*#000#123456789";
 #endif
 
 /**********************
@@ -63,10 +64,13 @@ static uint8_t password_admin_init[15] = "*#000#12345678";
 void Init_Door(void)
 {
 #if INIT_PASSWORD
-    // ghi mật khẩu user vao eeprom
-    // ghi mật khẩu admin vao eeprom
+    Flash_Write_Data(ADDRESS_STORE_PASSWORD_USER, password_use_init, 10);// ghi mật khẩu user vao eeprom
+    Flash_Write_Data(ADDRESS_STORE_PASSWORD_ADMIN, password_admin_init, 14);// ghi mật khẩu admin vao eeprom
     // ghi uid vào eeprom
 #endif
+    ENTER_Password(pass);		// đọc bàn phím nhập cái gì?
+    Flash_Read_Data(ADDRESS_STORE_PASSWORD_USER, password_user, 10);
+    Flash_Read_Data(ADDRESS_STORE_PASSWORD_ADMIN, password_admin, 15);
     // đọc số lần sai mật khẩu user từ eeprom
     // đọc số lần sai mật khẩu admin từ eeprom
     // đọc uid rfid từ eeprom

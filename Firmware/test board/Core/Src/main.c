@@ -21,8 +21,6 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "menu_mode.h"
-#include "lcd.h"
 #include "key_pad_basic.h"
 /* USER CODE END Includes */
 
@@ -44,11 +42,6 @@ typedef enum
   BLOCK_USER_STATE,
   BLOCK_ADMIN_STATE
 } state_handle_t;
-
-state_handle_t state_task = INIT_STATE;
-state_door_t state_door;
-uint8_t data_keypad[15];
-uint8_t data_temp;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -62,31 +55,48 @@ uint8_t data_temp;
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-SPI_HandleTypeDef hspi1;
-
-TIM_HandleTypeDef htim3;
 
 /* USER CODE BEGIN PV */
-
+state_handle_t state_task = INIT_STATE;
+state_door_t state_door;
+uint8_t data_keypad[15];
+uint8_t data_temp;
+uint8_t data = 13;
+static uint8_t state_no_null;
+static uint8_t change_state_null = 1;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
-static void MX_SPI1_Init(void);
-static void MX_TIM3_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+void STATE_BUTTON_Handle(void)
+{
+  if (data == 13)
+  {
+    if (state_no_null == 1)
+    {
+      change_state_null = 1;
+      state_no_null = 0;
+    }
+  }
+  else
+  {
+    state_no_null = 1;
+  }
+}
+
 uint8_t ENTER_Password(uint8_t *data_keypad)
 {
   static uint8_t dest = 0;
-  uint8_t data = 0;
-  data = keypad_handle();
-  if (data != NONE_PRESSING_STATE)
+
+  data = (uint8_t)keypad_handle();
+  if ((data != 13) &&  (change_state_null == 1))
   {
     if ((data == '#') || (data == '*'))
     {
@@ -94,7 +104,8 @@ uint8_t ENTER_Password(uint8_t *data_keypad)
       return data;
     }
     *(data_keypad + dest) = data;
-    dest++;
+    dest = dest + 1;
+    change_state_null = 0;
   }
   return 0;
 }
@@ -265,7 +276,6 @@ void task_handle(void)
     DISPLAY_Block_Admin(&lcd_0);
     break;
   default:
-    #error "No State access"
     break;
   }
 }
@@ -299,8 +309,6 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_SPI1_Init();
-  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -340,100 +348,16 @@ void SystemClock_Config(void)
   /** Initializes the CPU, AHB and APB buses clocks
   */
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-                              |RCC_CLOCKTYPE_PCLK1;
+                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
   if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
   {
     Error_Handler();
   }
-}
-
-/**
-  * @brief SPI1 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_SPI1_Init(void)
-{
-
-  /* USER CODE BEGIN SPI1_Init 0 */
-
-  /* USER CODE END SPI1_Init 0 */
-
-  /* USER CODE BEGIN SPI1_Init 1 */
-
-  /* USER CODE END SPI1_Init 1 */
-  /* SPI1 parameter configuration*/
-  hspi1.Instance = SPI1;
-  hspi1.Init.Mode = SPI_MODE_MASTER;
-  hspi1.Init.Direction = SPI_DIRECTION_2LINES;
-  hspi1.Init.DataSize = SPI_DATASIZE_4BIT;
-  hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
-  hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
-  hspi1.Init.NSS = SPI_NSS_HARD_OUTPUT;
-  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
-  hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
-  hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
-  hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
-  hspi1.Init.CRCPolynomial = 7;
-  hspi1.Init.CRCLength = SPI_CRC_LENGTH_DATASIZE;
-  hspi1.Init.NSSPMode = SPI_NSS_PULSE_ENABLE;
-  if (HAL_SPI_Init(&hspi1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN SPI1_Init 2 */
-
-  /* USER CODE END SPI1_Init 2 */
-
-}
-
-/**
-  * @brief TIM3 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_TIM3_Init(void)
-{
-
-  /* USER CODE BEGIN TIM3_Init 0 */
-
-  /* USER CODE END TIM3_Init 0 */
-
-  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
-  TIM_MasterConfigTypeDef sMasterConfig = {0};
-
-  /* USER CODE BEGIN TIM3_Init 1 */
-
-  /* USER CODE END TIM3_Init 1 */
-  htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 0;
-  htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 65535;
-  htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
-  if (HAL_TIM_ConfigClockSource(&htim3, &sClockSourceConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN TIM3_Init 2 */
-
-  /* USER CODE END TIM3_Init 2 */
-
 }
 
 /**
@@ -443,66 +367,12 @@ static void MX_TIM3_Init(void)
   */
 static void MX_GPIO_Init(void)
 {
-  GPIO_InitTypeDef GPIO_InitStruct = {0};
 /* USER CODE BEGIN MX_GPIO_Init_1 */
 /* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOD_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
-  __HAL_RCC_GPIOB_CLK_ENABLE();
-  __HAL_RCC_GPIOF_CLK_ENABLE();
-
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, DRIVER_BUZZER_Pin|DRIVER_LED_GRN_Pin|DRIVER_LED_RED_Pin|DRIVER_LOCK_Pin
-                          |LCD_D7_Pin|LCD_D6_Pin|LCD_D5_Pin|LCD_D4_Pin
-                          |LCD_D3_Pin|LCD_D2_Pin|LCD_D1_Pin|LCD_D0_Pin
-                          |LCD_EN_Pin|LCD_RW_Pin|LCD_RS_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, KEYPAD_C2_Pin|KEYPAD_C1_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOF, LCD_LED_Pin|KEYPAD_C3_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pins : DRIVER_BUZZER_Pin DRIVER_LED_GRN_Pin DRIVER_LED_RED_Pin DRIVER_LOCK_Pin
-                           LCD_D7_Pin LCD_D6_Pin LCD_D5_Pin LCD_D4_Pin
-                           LCD_D3_Pin LCD_D2_Pin LCD_D1_Pin LCD_D0_Pin
-                           LCD_EN_Pin LCD_RW_Pin LCD_RS_Pin */
-  GPIO_InitStruct.Pin = DRIVER_BUZZER_Pin|DRIVER_LED_GRN_Pin|DRIVER_LED_RED_Pin|DRIVER_LOCK_Pin
-                          |LCD_D7_Pin|LCD_D6_Pin|LCD_D5_Pin|LCD_D4_Pin
-                          |LCD_D3_Pin|LCD_D2_Pin|LCD_D1_Pin|LCD_D0_Pin
-                          |LCD_EN_Pin|LCD_RW_Pin|LCD_RS_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : KEYPAD_C2_Pin KEYPAD_C1_Pin */
-  GPIO_InitStruct.Pin = KEYPAD_C2_Pin|KEYPAD_C1_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : KEYPAD_R4_Pin KEYPAD_R3_Pin KEYPAD_R2_Pin KEYPAD_R1_Pin */
-  GPIO_InitStruct.Pin = KEYPAD_R4_Pin|KEYPAD_R3_Pin|KEYPAD_R2_Pin|KEYPAD_R1_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : LCD_LED_Pin */
-  GPIO_InitStruct.Pin = LCD_LED_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(LCD_LED_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : KEYPAD_C3_Pin */
-  GPIO_InitStruct.Pin = KEYPAD_C3_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(KEYPAD_C3_GPIO_Port, &GPIO_InitStruct);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 /* USER CODE END MX_GPIO_Init_2 */
